@@ -210,17 +210,35 @@ export class Renderer {
     ctx.restore();
   }
 
-  // ── Indicador de fase lunar ──
-  drawMoonPhase(p, illumination) {
+  // ── Luna con fase integrada ──
+  drawMoonWithPhase(p, illumination) {
     const { ctx } = this;
-    ctx.save(); ctx.translate(p.x + 14, p.y - 14);
-    const r = 8;
-    ctx.fillStyle = 'rgba(10,13,22,0.8)';
-    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+    const r = 5;
+    // Glow exterior
+    ctx.save();
+    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
+    grad.addColorStop(0, 'rgba(175,203,224,0.55)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // Parte iluminada (blanca)
+    ctx.save();
     ctx.fillStyle = '#DCEAF4';
-    ctx.beginPath(); ctx.arc(0, 0, r - 1, -Math.PI / 2, Math.PI / 2);
-    const bulge = (1 - illumination * 2) * r;
-    ctx.quadraticCurveTo(bulge, 0, 0, r - 1); ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
+
+    // Parte oscura (sombra) — cubre la porción no iluminada
+    ctx.fillStyle = 'rgba(10, 13, 22, 0.85)';
+    ctx.beginPath();
+    // Dibujar la sombra como un arco + curva del terminador
+    // illumination: 0 = nueva (todo oscuro), 1 = llena (todo claro)
+    // El terminador se desplaza de derecha a izquierda
+    const sweep = illumination * 2 - 1; // -1 (nueva) a +1 (llena)
+    // Sombra en el lado izquierdo, se encoge según iluminación
+    ctx.arc(p.x, p.y, r, Math.PI / 2, -Math.PI / 2);
+    ctx.quadraticCurveTo(p.x + sweep * r, p.y, p.x, p.y + r);
+    ctx.fill();
     ctx.restore();
   }
 

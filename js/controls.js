@@ -16,8 +16,6 @@ export class Controls {
     this.moonOffsetEl  = document.getElementById('moonOffset');
     this.moonOffsetVal = document.getElementById('moonOffsetVal');
 
-    this.preciseSunEl  = document.getElementById('preciseSun');
-    this.lunarNodalEl  = document.getElementById('lunarNodal');
     this.showSunTrailEl  = document.getElementById('showSunTrail');
     this.showMoonTrailEl = document.getElementById('showMoonTrail');
 
@@ -90,12 +88,6 @@ export class Controls {
       this._flagMoonClear = true;
     });
 
-    this.preciseSunEl.addEventListener('change', e => {
-      this.preciseSun = e.target.checked; this._flagSunClear = true;
-    });
-    this.lunarNodalEl.addEventListener('change', e => {
-      this.lunarNodal = e.target.checked; this._flagMoonClear = true;
-    });
     this.showSunTrailEl.addEventListener('change', e => {
       this.showSunTrail = e.target.checked;
     });

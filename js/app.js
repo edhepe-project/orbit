@@ -98,11 +98,9 @@ function renderFrame() {
   const illumination = Astro.lunarIllumination(t, controls.moonOffset);
   const eclipse = Astro.detectEclipse(t, controls.moonOffset, controls.lunarNodal);
 
-  // Dibujar astros (Luna debajo, Sol encima)
-  renderer.drawBody(pM, 'rgba(175,203,224,0.55)', '#DCEAF4', 5);
+  // Dibujar astros (Luna con fase integrada, Sol encima)
+  renderer.drawMoonWithPhase(pM, illumination);
   renderer.drawBody(pS, 'rgba(231,178,75,0.75)', '#FFE3A3', 6.5);
-
-  renderer.drawMoonPhase(pM, illumination);
   renderer.drawEclipseMarker(eclipse);
 
   // Actualizar readouts
