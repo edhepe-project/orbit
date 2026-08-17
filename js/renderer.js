@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════
 
 import * as Astro from './astronomy.js';
+import { CONTINENTS } from './geo.js';
 
 export class Renderer {
   constructor(canvasEl) {
@@ -147,7 +148,38 @@ export class Renderer {
     ctx.restore();
   }
 
-  // ── Solsticios / equinoccios ──
+  // ── Continentes (proyección azimutal equidistante polar) ──
+  drawContinents() {
+    const { ctx, cx, cy, Rmax } = this;
+    // Proyección: radio = (90 - lat) / 90 * Rmax, ángulo = lon en radianes
+    // Norte = centro, Ecuador = Rmax, Sur = fuera del canvas
+    function latLonToXY(lat, lon) {
+      const r = (90 - lat) / 90 * Rmax;
+      const ang = lon * Math.PI / 180;
+      return { x: cx + r * Math.sin(ang), y: cy - r * Math.cos(ang) };
+    }
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 0.8;
+    ctx.lineJoin = 'round';
+
+    for (const name in CONTINENTS) {
+      const polygons = CONTINENTS[name];
+      for (const poly of polygons) {
+        ctx.beginPath();
+        for (let i = 0; i < poly.length; i++) {
+          const [lat, lon] = poly[i];
+          const p = latLonToXY(lat, lon);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
   drawSeasonMarkers() {
     const { ctx } = this;
     const markers = [

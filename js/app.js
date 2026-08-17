@@ -76,6 +76,7 @@ function renderFrame() {
   // Capas de fondo
   renderer.drawHorizon();
   renderer.drawGrid();
+  renderer.drawContinents();
   renderer.drawEcliptic();
   renderer.drawZodiac();
   renderer.drawSeasonMarkers();
