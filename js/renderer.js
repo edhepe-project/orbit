@@ -151,10 +151,10 @@ export class Renderer {
   // ── Continentes (proyección azimutal equidistante polar) ──
   drawContinents() {
     const { ctx, cx, cy, Rmax } = this;
-    // Proyección: radio = (90 - lat) / 90 * Rmax, ángulo = lon en radianes
-    // Norte = centro, Ecuador = Rmax, Sur = fuera del canvas
+    // Usar la MISMA fórmula que radiusFor para alinear con la cuadrícula
+    // radio = (90 - lat) / 180 * Rmax  →  centro=90°N, borde=90°S, medio=ecuador
     function latLonToXY(lat, lon) {
-      const r = (90 - lat) / 90 * Rmax;
+      const r = (90 - lat) / 180 * Rmax;
       const ang = lon * Math.PI / 180;
       return { x: cx + r * Math.sin(ang), y: cy - r * Math.cos(ang) };
     }
@@ -164,19 +164,16 @@ export class Renderer {
     ctx.lineWidth = 0.8;
     ctx.lineJoin = 'round';
 
-    for (const name in CONTINENTS) {
-      const polygons = CONTINENTS[name];
-      for (const poly of polygons) {
-        ctx.beginPath();
-        for (let i = 0; i < poly.length; i++) {
-          const [lat, lon] = poly[i];
-          const p = latLonToXY(lat, lon);
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        }
-        ctx.closePath();
-        ctx.stroke();
+    for (const poly of CONTINENTS) {
+      ctx.beginPath();
+      for (let i = 0; i < poly.length; i++) {
+        const [lat, lon] = poly[i];
+        const p = latLonToXY(lat, lon);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
       }
+      ctx.closePath();
+      ctx.stroke();
     }
     ctx.restore();
   }
