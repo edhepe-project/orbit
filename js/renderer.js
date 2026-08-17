@@ -4,7 +4,6 @@
 // ═══════════════════════════════════════════
 
 import * as Astro from './astronomy.js';
-import { CONTINENTS } from './geo.js';
 
 export class Renderer {
   constructor(canvasEl) {
@@ -24,12 +23,10 @@ export class Renderer {
     this.DPR = Math.min(window.devicePixelRatio || 1, 2);
     const rect = this.host.getBoundingClientRect();
     let w = rect.width, h = rect.height;
-    // Fallback si el contenedor no tiene dimensiones
     if (w < 50 || h < 50) {
       w = Math.min(window.innerWidth - 400, 720);
       h = Math.min(window.innerHeight - 120, 720);
     }
-    // Forzar cuadrado
     const side = Math.min(w, h);
     this.canvas.width = side * this.DPR;
     this.canvas.height = side * this.DPR;
@@ -43,21 +40,16 @@ export class Renderer {
     this.Rmax = side * 0.46;
   }
 
-  // ── Conversión coordenadas ──
   radiusFor(dec) { return this.Rmax * (90 - dec) / 180; }
 
   posFrom(r, ang) {
-    return {
-      x: this.cx + r * Math.sin(ang),
-      y: this.cy - r * Math.cos(ang)
-    };
+    return { x: this.cx + r * Math.sin(ang), y: this.cy - r * Math.cos(ang) };
   }
 
   // ── Horizonte / atmósfera ──
   drawHorizon() {
     const { ctx, cx, cy, Rmax } = this;
     const rH = this.radiusFor(0);
-
     ctx.save();
     ctx.beginPath(); ctx.arc(cx, cy, Rmax, 0, Math.PI * 2);
     ctx.arc(cx, cy, rH, 0, Math.PI * 2, true);
@@ -66,7 +58,6 @@ export class Renderer {
     grd.addColorStop(1, 'rgba(10,13,22,0.7)');
     ctx.fillStyle = grd; ctx.fill('evenodd');
     ctx.restore();
-
     ctx.save();
     ctx.beginPath(); ctx.arc(cx, cy, rH, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(95,168,160,0.25)';
@@ -79,29 +70,22 @@ export class Renderer {
   drawGrid() {
     const { ctx, cx, cy, Rmax } = this;
     const decRings = [90, 66.5, 23.5, 0, -23.5, -66.5, -90];
-
-    // Bandas tropicales Sol
     ctx.save();
     const rS1 = this.radiusFor(-Astro.DEC_SUN_MAX), rS2 = this.radiusFor(Astro.DEC_SUN_MAX);
     ctx.beginPath(); ctx.arc(cx, cy, rS1, 0, Math.PI * 2);
     ctx.arc(cx, cy, rS2, 0, Math.PI * 2, true);
     ctx.fillStyle = 'rgba(231,178,75,0.05)'; ctx.fill('evenodd');
-    // Bandas tropicales Luna
     const rM1 = this.radiusFor(-Astro.DEC_MOON_MAX), rM2 = this.radiusFor(Astro.DEC_MOON_MAX);
     ctx.beginPath(); ctx.arc(cx, cy, rM1, 0, Math.PI * 2);
     ctx.arc(cx, cy, rM2, 0, Math.PI * 2, true);
     ctx.fillStyle = 'rgba(175,203,224,0.045)'; ctx.fill('evenodd');
     ctx.restore();
-
-    // Radios (spokes)
     ctx.save(); ctx.strokeStyle = 'rgba(46,58,92,0.35)'; ctx.lineWidth = 1;
     for (let i = 0; i < 12; i++) {
       const a = i * Math.PI / 6, p = this.posFrom(Rmax, a);
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p.x, p.y); ctx.stroke();
     }
     ctx.restore();
-
-    // Anillos de declinación
     ctx.save();
     decRings.forEach(d => {
       const r = this.radiusFor(d);
@@ -110,8 +94,6 @@ export class Renderer {
       ctx.lineWidth = d === 0 ? 1.2 : 1; ctx.stroke();
     });
     ctx.restore();
-
-    // Etiquetas
     ctx.save();
     ctx.font = "11px 'JetBrains Mono', monospace";
     ctx.fillStyle = '#7C88A6'; ctx.textBaseline = 'middle';
@@ -134,7 +116,7 @@ export class Renderer {
     ctx.stroke(); ctx.setLineDash([]); ctx.restore();
   }
 
-  // ── Zodiac en borde exterior ──
+  // ── Zodiac ──
   drawZodiac() {
     const { ctx, Rmax } = this;
     const signs = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
@@ -148,35 +130,7 @@ export class Renderer {
     ctx.restore();
   }
 
-  // ── Continentes (proyección azimutal equidistante polar) ──
-  drawContinents() {
-    const { ctx, cx, cy, Rmax } = this;
-    // Usar la MISMA fórmula que radiusFor para alinear con la cuadrícula
-    // radio = (90 - lat) / 180 * Rmax  →  centro=90°N, borde=90°S, medio=ecuador
-    function latLonToXY(lat, lon) {
-      const r = (90 - lat) / 180 * Rmax;
-      const ang = lon * Math.PI / 180;
-      return { x: cx + r * Math.sin(ang), y: cy - r * Math.cos(ang) };
-    }
-
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-    ctx.lineWidth = 0.8;
-    ctx.lineJoin = 'round';
-
-    for (const poly of CONTINENTS) {
-      ctx.beginPath();
-      for (let i = 0; i < poly.length; i++) {
-        const [lat, lon] = poly[i];
-        const p = latLonToXY(lat, lon);
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      }
-      ctx.closePath();
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
+  // ── Solsticios / equinoccios ──
   drawSeasonMarkers() {
     const { ctx } = this;
     const markers = [
@@ -243,7 +197,6 @@ export class Renderer {
   drawMoonWithPhase(p, illumination) {
     const { ctx } = this;
     const r = 5;
-    // Glow exterior
     ctx.save();
     const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
     grad.addColorStop(0, 'rgba(175,203,224,0.55)');
@@ -251,20 +204,12 @@ export class Renderer {
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-
-    // Parte iluminada (blanca)
     ctx.save();
     ctx.fillStyle = '#DCEAF4';
     ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
-
-    // Parte oscura (sombra) — cubre la porción no iluminada
     ctx.fillStyle = 'rgba(10, 13, 22, 0.85)';
     ctx.beginPath();
-    // Dibujar la sombra como un arco + curva del terminador
-    // illumination: 0 = nueva (todo oscuro), 1 = llena (todo claro)
-    // El terminador se desplaza de derecha a izquierda
-    const sweep = illumination * 2 - 1; // -1 (nueva) a +1 (llena)
-    // Sombra en el lado izquierdo, se encoge según iluminación
+    const sweep = illumination * 2 - 1;
     ctx.arc(p.x, p.y, r, Math.PI / 2, -Math.PI / 2);
     ctx.quadraticCurveTo(p.x + sweep * r, p.y, p.x, p.y + r);
     ctx.fill();
