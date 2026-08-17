@@ -47,8 +47,8 @@ export class Controls {
     this.playing       = false;
     this.speed         = 6;
     this.moonOffset    = 0;
-    this.preciseSun    = false;
-    this.lunarNodal    = false;
+    this.preciseSun    = true;
+    this.lunarNodal    = true;
     this.showSunTrail  = true;
     this.showMoonTrail = true;
     this.trailMax      = 3000;
