@@ -1,0 +1,232 @@
+/* ═══════════════════════════════════════════
+   style.css — Variables, layout, componentes
+   ═══════════════════════════════════════════ */
+
+/* ── Variables ── */
+:root {
+  --bg: #0A0D16;
+  --panel: #111729;
+  --panel-2: #161D33;
+  --grid: #2E3A5C;
+  --grid-soft: #212a44;
+  --text: #EDEAE0;
+  --text-dim: #8189A4;
+  --gold: #E7B24B;
+  --gold-soft: rgba(231, 178, 75, 0.16);
+  --silver: #AFCBE0;
+  --silver-soft: rgba(175, 203, 224, 0.14);
+  --teal: #5FA8A0;
+  --line: #232B45;
+  --sidebar-w: 360px;
+}
+
+/* ── Reset ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Inter', sans-serif;
+  width: 100%; height: 100%;
+  overflow: hidden;
+}
+
+/* ── Layout principal: flex en vez de grid para evitar colapso ── */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+header {
+  flex: 0 0 auto;
+  padding: 20px 32px 12px 32px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .18em;
+  color: var(--teal); text-transform: uppercase;
+  margin-bottom: 4px;
+}
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; font-size: 32px;
+  margin: 0 0 4px 0; letter-spacing: .01em;
+}
+h1 em { color: var(--gold); font-style: normal; }
+.sub {
+  color: var(--text-dim); font-size: 13px;
+  max-width: 640px; line-height: 1.5;
+}
+
+/* ── Contenido: canvas + sidebar lado a lado ── */
+.content {
+  flex: 1 1 0;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Canvas (zona izquierda) ── */
+.stage {
+  flex: 1 1 0;
+  min-width: 0; min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--bg);
+  overflow: hidden;
+}
+#canvasHost {
+  position: relative;
+  width: 100%; height: 100%;
+  max-width: 720px; max-height: 720px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+canvas {
+  display: block;
+  border-radius: 4px;
+  /* width/height se setean via JS en resize() */
+}
+
+/* ── Legend ── */
+.legend {
+  position: absolute; left: 24px; bottom: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+  display: flex; gap: 18px;
+  pointer-events: none;
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+.dot.sun { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+.dot.moon { background: var(--silver); box-shadow: 0 0 6px var(--silver); }
+
+/* ── Sidebar (zona derecha) ── */
+aside {
+  flex: 0 0 var(--sidebar-w);
+  width: var(--sidebar-w);
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  padding: 16px 18px 24px 18px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+@media (max-width: 880px) {
+  .content { flex-direction: column; }
+  aside {
+    flex: 0 0 auto;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--line);
+    max-height: 50vh;
+  }
+  #canvasHost { max-height: 50vh; }
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 14px 16px 14px;
+  margin-bottom: 12px;
+}
+.card h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600; font-size: 11.5px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-dim); margin: 0 0 10px 0;
+  display: flex; align-items: center; gap: 8px;
+}
+.card h2 .bar {
+  width: 14px; height: 2px; background: var(--teal); display: inline-block;
+}
+
+/* ── Readout grid ── */
+.readout-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.readout { font-family: 'JetBrains Mono', monospace; }
+.readout .k {
+  font-size: 10px; color: var(--text-dim); letter-spacing: .04em;
+}
+.readout .v { font-size: 14px; margin-top: 2px; }
+.readout .v.sun { color: var(--gold); }
+.readout .v.moon { color: var(--silver); }
+
+/* ── Rows ── */
+.row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.row:last-child { margin-bottom: 0; }
+.row label {
+  font-size: 12px; color: var(--text-dim);
+  flex: 0 0 auto; min-width: 110px;
+}
+.row .valtag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text);
+  min-width: 52px; text-align: right;
+}
+
+/* ── Inputs ── */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 3px; background: var(--grid);
+  border-radius: 2px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--teal); cursor: pointer; border: 2px solid #0A0D16;
+}
+input[type=number], input[type=text] {
+  background: #0D1220; border: 1px solid var(--line); color: var(--text);
+  border-radius: 6px; padding: 5px 7px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  width: 100%;
+}
+
+/* ── Buttons ── */
+.btnrow { display: flex; gap: 8px; }
+button {
+  font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px;
+  letter-spacing: .02em;
+  background: #0D1220; color: var(--text); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+button:hover { border-color: var(--teal); color: var(--teal); }
+button.primary {
+  background: var(--teal); color: #0A0D16; border-color: var(--teal);
+}
+button.primary:hover { opacity: .9; color: #0A0D16; }
+
+/* ── Checkboxes ── */
+.checks { display: flex; flex-direction: column; gap: 7px; }
+.check {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; color: var(--text-dim);
+}
+.check input {
+  accent-color: var(--teal); width: 14px; height: 14px;
+}
+
+/* ── Footnote ── */
+.footnote {
+  font-size: 11px; color: var(--text-dim);
+  line-height: 1.5; margin-top: 4px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
